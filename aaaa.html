@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GIPHY API Demo
+	  
+  </title>
+
+  <style>
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .list-item {
+      flex: 33.33%;
+      cursor: pointer;
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+    }
+    .detail-view {
+      display: none;
+      padding: 20px;
+      background-color: #f5f5f5;
+      border: 1px solid #ccc;
+    }
+    .search-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 50px;
+    }
+    .search-input {
+      width: 400px;
+      height: 40px;
+      padding: 5px;
+      font-size: 18px;
+    }
+    .search-button {
+      height: 40px;
+      padding: 5px 15px;
+      font-size: 18px;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>GIPHY API Demo</h1>
+
+  <div class="search-bar">
+    <input type="text" id="search-input" class="search-input" placeholder="Search GIPHY..." onkeydown="handleEnter(event)">
+    <button id="search-button" class="search-button">Search</button>
+  </div>
+
+  <div class="container" id="list-view"></div>
+
+  <div id="detail-view" class="detail-view"></div>
+
+  <script>
+    // GIPHY API endpoint for trending GIFs
+    const trendingEndpoint = 'https://api.giphy.com/v1/gifs/trending?api_key=jUu6RRjtJFaJNRtOvfFPP4Bfw7FjlJuY&limit=3';
+
+    // GIPHY API endpoint for search GIFs
+    const searchEndpoint = 'https://api.giphy.com/v1/gifs/search?api_key=jUu6RRjtJFaJNRtOvfFPP4Bfw7FjlJuY&limit=3&q=';
+
+    // Function to fetch GIFs from the GIPHY API
+    function fetchGIFs(endpoint) {
+      fetch(endpoint)
+        .then(response => response.json())
+        .then(data => {
+          const listView = document.getElementById('list-view');
+          listView.innerHTML = '';
+          data.data.forEach(item => {
+            const listItem = document.createElement('div');
+            listItem.classList.add('list-item');
+            listItem.innerHTML = `<img src="${item.images.fixed_height.url}" alt="${item.title}">`;
+            listItem.addEventListener('click', () => showGIFDetails(item));
+            listView.appendChild(listItem);
+          });
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Function to show the detailed view of a GIF
+    function showGIFDetails(gif) {
+      const detailView = document.getElementById('detail-view');
+      detailView.innerHTML = `
+        <h2>${gif.title}</h2>
+        <img src="${gif.images.original.url}" alt="${gif.title}">
+        <p>Rating: ${gif.rating}</p>
+      `;
+      detailView.style.display = 'block';
+    }
+
+    // Function to handle search
+    function handleSearch() {
+      const searchInput = document.getElementById('search-input');
+      const searchTerm = searchInput.value.trim();
+      if (searchTerm !== '') {
+        const searchEndpointWithTerm = searchEndpoint + searchTerm;
+        fetchGIFs(searchEndpointWithTerm);
+      }
+    }
+
+    // Function to handle Enter key press event
+    function handleEnter(event) {
+      if (event.keyCode === 13) {
+        handleSearch();
+      }
+    }
+
+    // Fetch and display trending GIFs on page load
+    window.addEventListener('load', () => fetchGIFs(trendingEndpoint));
+
+    // Add event listener to search button
+    const searchButton = document.getElementById('search-button');
+    searchButton.addEventListener('click', handleSearch);
+  </script>
+</body>
+</html>
